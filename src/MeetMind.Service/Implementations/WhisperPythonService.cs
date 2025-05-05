@@ -7,13 +7,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using MeetMind.Service.Models;
 
-namespace MeetMind.Service;
+namespace MeetMind.Service.Implementations;
 
 public class WhisperPythonService
 {
     public  async Task<TranscriptionResult> TranscribeViaPythonAsync(string audioPath)
     {
-#if WINDOWS
+
     var result = new TranscriptionResult();
 
     try
@@ -64,14 +64,7 @@ public class WhisperPythonService
             Error = ex.Message
         };
     }
-#else
-        return new TranscriptionResult
-        {
-            Success = false,
-            Error = "Transcription Python uniquement disponible sur Windows."
-        };
-#endif
-    }
+ }
 
 
     string GetPythonScriptPath()

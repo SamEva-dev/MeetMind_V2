@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.Text;
 using MeetMind.Service;
+using MeetMind.Service.Implementations;
 using MeetMindUI.InteropServices;
 using Serilog;
 

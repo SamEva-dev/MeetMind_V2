@@ -7,6 +7,11 @@ using Serilog.Enrichers.WithCaller;
 using Serilog.Events;
 using MeetMindUI.ViewModels;
 using MeetMindUI.Views;
+using MeetMind.Service.Implementations;
+using MeetMind.Service.Implementations.Windows;
+
+
+
 #if ANDROID
 using MeetMind.Service.Implementations.Androids;
 #elif WINDOWS
@@ -34,16 +39,27 @@ namespace MeetMindUI
 
             builder.Logging.AddSerilog(dispose: true);
 #if ANDROID
-            builder.Services.AddSingleton<IAudioRecorderService, AudioRecorderService_Android>();
+            builder.Services.AddSingleton<IAudioRecorderService, AudioRecorderService_Android>()
+                            .AddSingleton<ITranscriptionService, WhisperMobileTranscriptionService>();
 #elif WINDOWS
-            builder.Services.AddSingleton<IAudioRecorderService, AudioRecorderService_Windows>();
+            builder.Services.AddSingleton<IAudioRecorderService, AudioRecorderService_Windows>()
+                            .AddSingleton<ITranscriptionService, WhisperPythonTranscriptionService>();
 #endif
 
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
+
+            builder.Services.AddSingleton<WhisperPythonService>();
+           
+            // Register transcription service implementations
+
             builder.Services.AddSingleton<RecordingViewModel>();
             builder.Services.AddSingleton<RecordingPage>();
+            builder.Services.AddSingleton<ISummaryService, SummarizationPythonService>();
+
+            // Summary service
+
             return builder.Build();
         }
 

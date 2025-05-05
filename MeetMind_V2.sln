@@ -15,7 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WhisperPython", "WhisperPython", "{45D6ACFB-E703-4C6D-982A-731518CB9908}"
 	ProjectSection(SolutionItems) = preProject
-		transcribe.py = transcribe.py
+		src\WhisperPython\summarize.py = src\WhisperPython\summarize.py
+		src\WhisperPython\transcribe.py = src\WhisperPython\transcribe.py
 	EndProjectSection
 EndProject
 Global
