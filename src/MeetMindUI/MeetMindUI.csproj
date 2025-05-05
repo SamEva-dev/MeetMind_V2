@@ -42,6 +42,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Include="..\WhisperPython\transcribe.py">
+			<Link>transcribe.py</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  </None>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
 
@@ -57,6 +61,10 @@
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<AndroidAsset Remove="Platforms\Android\Assets\test.wav" />
+		
+		<!-- Add libwhisper lib for whisper.cpp for android -->
+		<AndroidNativeLibrary Include="Platforms\Android\jniLibs\**\*.so" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -68,6 +76,18 @@
 		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Platforms\Android\Assets\" />
+	  <Folder Include="Platforms\Android\jniLibs\arm64-v8a\" />
+	  <Folder Include="Platforms\Android\jniLibs\armeabi-v7a\" />
+	  <Folder Include="Platforms\Android\jniLibs\x86\" />
+	  <Folder Include="Platforms\Android\jniLibs\x86_64\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\MeetMind.Service\MeetMind.Service.csproj" />
 	</ItemGroup>
 
 </Project>

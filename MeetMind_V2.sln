@@ -11,6 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeetMind.Whisper", "src\Mee
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeetMind.tests", "src\MeetMind.tests\MeetMind.tests.csproj", "{B34DB5B8-2981-4BDB-82F3-29945728352B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WhisperPython", "WhisperPython", "{45D6ACFB-E703-4C6D-982A-731518CB9908}"
+	ProjectSection(SolutionItems) = preProject
+		transcribe.py = transcribe.py
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +44,13 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0EEA4DE2-749A-4AB6-83F4-F54BF6B81573} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{6AB2F302-6D75-4795-B0B7-69915F80B510} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{C43FC643-B544-42A9-B5C0-2BBA35245A9A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{B34DB5B8-2981-4BDB-82F3-29945728352B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{45D6ACFB-E703-4C6D-982A-731518CB9908} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E6579C10-2DF0-4B19-AEB3-07BCEED9B709}
