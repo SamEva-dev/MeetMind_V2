@@ -35,11 +35,6 @@
                 HorizontalOptions="Fill"
                 SemanticProperties.Hint="Counts the number of times you click"
                 Text="Transcrip whisper" />
-            <Button
-                Clicked="OnVoskTranscribeClicked"
-                HorizontalOptions="Fill"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Text="Transcrip Vosk" />
         </VerticalStackLayout>
     </ScrollView>
 

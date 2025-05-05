@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MeetMindUI.ViewModels"
+             x:Class="MeetMindUI.Views.RecordingPage"
+             Title="RecordingPage">
+    
+
+    <StackLayout Padding="20" Spacing="15">
+        <Label Text="{Binding StatusText}"
+           FontSize="Medium"
+           HorizontalOptions="Center" />
+
+        <Button Text="Start Recording"
+            Command="{Binding StartRecordingCommand
+            }" />
+
+        <Button Text="Stop Recording"
+            Command="{Binding StopRecordingCommand}" />
+    </StackLayout>
+</ContentPage>

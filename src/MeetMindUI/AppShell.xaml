@@ -4,12 +4,17 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:MeetMindUI"
-    Shell.FlyoutBehavior="Flyout"
-    Title="MeetMindUI">
+    xmlns:views="clr-namespace:MeetMindUI.Views"
+    Title="MeetMindUI"
+    Shell.FlyoutBehavior="Flyout">
 
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
+    <ShellContent
+        Title="Record"
+        ContentTemplate="{DataTemplate views:RecordingPage}"
+        Route="RecordingPage" />
 
 </Shell>
