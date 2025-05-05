@@ -62,7 +62,7 @@ namespace MeetMindUI
 
                     Java.Lang.JavaSystem.LoadLibrary("whisper");
 
-                Console.WriteLine("libwhisper.so loaded");
+                    Console.WriteLine("libwhisper.so loaded");
                 }
                 catch (Exception ex)
                 {
@@ -126,49 +126,6 @@ namespace MeetMindUI
             if (!Directory.Exists(modelDir))
             {
                 ZipFile.ExtractToDirectory(zipDest, modelDir);
-            }
-        }
-
-        private async void OnVoskTranscribeClicked(object sender, EventArgs e)
-        {
-            await PrepareVoskAsync();
-
-            string modelDir = Path.Combine(FileSystem.AppDataDirectory, "vosk-model-small-fr");
-            string audioPath = Path.Combine(FileSystem.AppDataDirectory, "test.wav"); // déjà copié via ton code
-
-            var service = new VoskMobileService();
-            service.EnsureModelLoaded(modelDir);
-
-            string transcript = service.Transcribe(audioPath);
-
-            await DisplayAlert("Vosk Transcription", transcript, "OK");
-            Log.Information("Vosk transcribed text: {Text}", transcript);
-        }
-
-        private static readonly string[] ModelFiles = new[]
-{
-    "model/am",
-    "model/conf/config.json",
-    "model/ivector.scp",
-    // etc.
-};
-
-        private async Task CopyModelFilesAsync()
-        {
-            string modelName = "vosk-model-small-fr";
-            string destDir = Path.Combine(FileSystem.AppDataDirectory, modelName);
-
-            if (!Directory.Exists(destDir))
-                Directory.CreateDirectory(destDir);
-
-            foreach (var relativePath in ModelFiles)
-            {
-                var assetPath = Path.Combine(modelName, relativePath);
-                using var src = await FileSystem.OpenAppPackageFileAsync(assetPath);
-                var destPath = Path.Combine(destDir, relativePath);
-                Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
-                using var dst = File.Create(destPath);
-                await src.CopyToAsync(dst);
             }
         }
 
