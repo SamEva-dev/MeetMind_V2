@@ -1,60 +1,72 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MeetMindUI.Views.HistoryPage"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             Title="HistoryPage">
+<ContentPage
+    x:Class="MeetMindUI.Views.HistoryPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:MeetMindUI.ViewModels"
+    Title="HistoryPage">
+
     <VerticalStackLayout Padding="10" Spacing="10">
         <SearchBar Placeholder="Search by name"
                Text="{Binding SearchText, Mode=TwoWay}" />
 
         <DatePicker Date="{Binding FilterDate, Mode=TwoWay}" />
-        <Picker Title="Sort by date"
-        ItemsSource="{Binding SortOptions}"
-        SelectedIndex="{Binding SelectedSortOrder, Mode=TwoWay}">
-        </Picker>
 
+        <Picker Title="Sort by date"
+            ItemsSource="{Binding SortOptions}"
+            SelectedIndex="{Binding SelectedSortOrder, Mode=TwoWay}" />
 
         <HorizontalStackLayout Spacing="10">
             <Button Text="Filter" Command="{Binding FilterCommand}" />
             <Button Text="Reset filters" Command="{Binding ResetFiltersCommand}" />
         </HorizontalStackLayout>
 
+        <CollectionView ItemsSource="{Binding FilteredRecordings}" x:Name="collectionView">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout Padding="10" Spacing="5">
+                        <Label Text="{Binding DisplayName}" FontAttributes="Bold" />
+                        <Label Text="{Binding Created}" FontSize="12" TextColor="Gray" />
 
-        <CollectionView ItemsSource="{Binding FilteredRecordings}" Margin="10">
-        <CollectionView.ItemTemplate>
-            <DataTemplate>
-                <StackLayout Padding="10" Spacing="5">
-                    <Label Text="{Binding DisplayName}" FontAttributes="Bold" />
-                    <Label Text="{Binding Created}" FontSize="12" TextColor="Gray" />
+                        <toolkit:MediaElement Source="{Binding AudioPath}"
+                                  ShouldShowPlaybackControls="True"
+                                  ShouldAutoPlay="False"
+                                  HeightRequest="50"
+                                  Margin="0,5" />
 
-                    <toolkit:MediaElement Source="{Binding AudioPath}"
-                                ShouldShowPlaybackControls="True"
-                                ShouldAutoPlay="False"
-                                HeightRequest="50"
-                                Margin="0,5" />
+                        <HorizontalStackLayout Spacing="10">
+                            <Button Text="Reassign"
+                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=ReassignCommand}"
+                      CommandParameter="{Binding}" />
 
+                            <Button Text="Delete"
+                      BackgroundColor="Red"
+                      TextColor="White"
+                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=DeleteCommand}"
+                      CommandParameter="{Binding}" />
 
-                    <HorizontalStackLayout Spacing="10">
-                        <!--<Button Text="Play"
-                    Command="{Binding PlayCommand}" />-->
+                            <Button Text="Export"
+                      BackgroundColor="DarkGreen"
+                      TextColor="White"
+                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=ExportCommand}"
+                      CommandParameter="{Binding}" />
 
-                        <Button Text="Reassign"
-                    Command="{Binding ReassignCommand}" />
+                            <Button Text="Share"
+                      BackgroundColor="DarkBlue"
+                      TextColor="White"
+                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=ShareCommand}"
+                      CommandParameter="{Binding}" />
+                        </HorizontalStackLayout>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
 
-                        <Button Text="Delete"
-                    BackgroundColor="Red"
-                    TextColor="White"
-                    Command="{Binding DeleteCommand}" />
-                    </HorizontalStackLayout>
-                </StackLayout>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
-        <!--<Label Text="No recordings found."
-           IsVisible="{Binding FilteredRecordings.Count, Converter={toolkit:BoolToObjectConverter}, ConverterParameter=Inverse}"
+        <Label Text="No recordings found."
+           IsVisible="{Binding FilteredRecordings.Count, Converter={StaticResource BoolToVisibilityInverted}}"
            TextColor="Gray"
            FontAttributes="Italic"
-           HorizontalOptions="Center" />-->
+           HorizontalOptions="Center" />
     </VerticalStackLayout>
 </ContentPage>

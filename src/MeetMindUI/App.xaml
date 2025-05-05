@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MeetMindUI"
              xmlns:conv="clr-namespace:MeetMindUI.Converters"
+             xmlns:toolkit="clr-namespace:CommunityToolkit.Maui.Converters;assembly=CommunityToolkit.Maui"
              x:Class="MeetMindUI.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -11,6 +12,7 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <conv:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"  Inverse="True"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
