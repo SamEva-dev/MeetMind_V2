@@ -16,5 +16,9 @@
         Title="Record"
         ContentTemplate="{DataTemplate views:RecordingPage}"
         Route="RecordingPage" />
+    <ShellContent
+        Title="Histories"
+        ContentTemplate="{DataTemplate views:HistoryPage}"
+        Route="HistoryPage" />
 
 </Shell>

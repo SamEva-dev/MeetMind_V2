@@ -31,11 +31,14 @@ namespace MeetMindUI
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
+                .UseMauiCommunityToolkitMediaElement()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
+
+            CopyCredentialsToAppData().Wait();
 
             builder.Logging.AddSerilog(dispose: true);
 #if ANDROID
@@ -56,7 +59,24 @@ namespace MeetMindUI
 
             builder.Services.AddSingleton<RecordingViewModel>();
             builder.Services.AddSingleton<RecordingPage>();
+            builder.Services.AddTransient<ParticipantsViewModel>();
+            builder.Services.AddSingleton<HistoryPage>();
+            builder.Services.AddSingleton<HistoryViewModel>();
             builder.Services.AddSingleton<ISummaryService, SummarizationPythonService>();
+            builder.Services.AddSingleton<IVoiceMappingStore, JsonVoiceMappingStore>();
+
+
+            // Enregistrement du service Google Calendar
+            builder.Services.AddSingleton<ICalendarService, GoogleCalendarService>(sp =>
+            {
+                var path = Path.Combine(FileSystem.AppDataDirectory, "credentials.json");
+                if (!File.Exists(path))
+                {
+                    Log.Error("Google credential calendar not found at path: {Path}", path);
+                }
+                return new GoogleCalendarService(path);
+            });
+
 
             // Summary service
 
@@ -80,6 +100,19 @@ namespace MeetMindUI
                             retainedFileCountLimit: 7,
                             outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] ({Caller}) {Message:lj}{NewLine}{Exception}")
             .CreateLogger();
+        }
+
+        private static async Task CopyCredentialsToAppData()
+        {
+            var targetPath = Path.Combine(FileSystem.AppDataDirectory, "credentials.json");
+
+            // Si déjà copié, rien à faire
+            if (File.Exists(targetPath))
+                return;
+
+            using var stream = await FileSystem.OpenAppPackageFileAsync("credentials.json");
+            using var fs = File.Create(targetPath);
+            await stream.CopyToAsync(fs);
         }
     }
 }

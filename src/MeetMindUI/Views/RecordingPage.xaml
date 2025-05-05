@@ -16,6 +16,9 @@
         <Button Command="{Binding StartRecordingCommand}" Text="Start Recording" />
 
         <Button Command="{Binding StopRecordingCommand}" Text="Stop Recording" />
+        <Button Text="Reassign Speakers"
+        Command="{Binding ReassignSpeakersCommand}" />
+
 
         <ActivityIndicator IsRunning="{Binding IsTranscribing}" IsVisible="{Binding IsTranscribing}" />
 
