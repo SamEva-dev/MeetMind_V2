@@ -399,3 +399,5 @@ FodyWeavers.xsd
 *.mp3
 # JetBrains Rider
 *.sln.iml
+
+src/MeetMindUI/Resources/Raw/*.json

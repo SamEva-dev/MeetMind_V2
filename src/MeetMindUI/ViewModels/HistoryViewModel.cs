@@ -16,6 +16,7 @@ public partial class HistoryViewModel : ObservableObject
 {
     private readonly IVoiceMappingStore _voiceMappingStore;
     private readonly RecordingViewModel _recordingViewModel;
+    private readonly IGoogleDriveUploaderService _driveUploaderService;
 
     public ObservableCollection<RecordingItem> Recordings { get; } = new();
     public ObservableCollection<RecordingItem> FilteredRecordings { get; } = new();
@@ -33,12 +34,15 @@ public partial class HistoryViewModel : ObservableObject
     private DateTime filterDate = DateTime.Today;
 
     [ObservableProperty]
-    private SortOrder selectedSortOrder = SortOrder.NewestFirst;
+    private int selectedSortOrder = 0;
 
-    public HistoryViewModel(IVoiceMappingStore voiceMappingStore, RecordingViewModel recordingViewModel)
+    public HistoryViewModel(IVoiceMappingStore voiceMappingStore, 
+        RecordingViewModel recordingViewModel,
+        IGoogleDriveUploaderService driveUploaderService)
     {
         _voiceMappingStore = voiceMappingStore;
         _recordingViewModel = recordingViewModel;
+        _driveUploaderService = driveUploaderService;
         Load();
     }
 
@@ -161,6 +165,26 @@ public partial class HistoryViewModel : ObservableObject
         });
     }
 
+    [RelayCommand]
+    private async Task TagClickAsync(string tag)
+    {
+        SearchText = tag;
+        ApplyFilter();
+    }
+
+    [RelayCommand]
+    private async Task UploadToDriveAsync(RecordingItem item)
+    {
+        if (!_lastExports.TryGetValue(item.FileName, out var zipPath) || !File.Exists(zipPath))
+        {
+            await Application.Current.MainPage.DisplayAlert("Info", "Exporting file before upload...", "OK");
+            await ExportAsync(item);
+            zipPath = _lastExports[item.FileName];
+        }
+
+        await _driveUploaderService.UploadRecordingAsync(zipPath, item.DisplayName, item.Created);
+        await Application.Current.MainPage.DisplayAlert("Google Drive", "Upload completed successfully.", "OK");
+    }
 
     private void ApplyFilter()
     {

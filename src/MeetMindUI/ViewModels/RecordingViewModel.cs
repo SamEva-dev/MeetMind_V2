@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
@@ -16,6 +17,7 @@ public partial class RecordingViewModel : ObservableObject
     private readonly ISummaryService _summaryService;
     private readonly ICalendarService _calendarService;
     private readonly IVoiceMappingStore _voiceMappingStore;
+    private readonly ITagGeneratorService _tagGeneratorService;
 
     [ObservableProperty]
     private bool _isRecording;
@@ -42,7 +44,8 @@ public partial class RecordingViewModel : ObservableObject
                             ITranscriptionService transcriptionService,
                             ISummaryService summaryService,
                             ICalendarService calendarService,
-                            IVoiceMappingStore voiceMappingStore)
+                            IVoiceMappingStore voiceMappingStore,
+                            ITagGeneratorService tagGeneratorService)
     {
         _recorderService = recorderService;
         _transcriptionService = transcriptionService;
@@ -50,6 +53,7 @@ public partial class RecordingViewModel : ObservableObject
         _calendarService = calendarService;
         _voiceMappingStore = voiceMappingStore;
         _voiceMappingStore = voiceMappingStore;
+        _tagGeneratorService = tagGeneratorService;
     }
 
     [RelayCommand(CanExecute = nameof(CanStartRecording))]
@@ -283,6 +287,20 @@ public partial class RecordingViewModel : ObservableObject
             IsSummarizing = false;
             StatusText = "Ready to record";
         }
+    }
+
+    public async Task ProcessAfterTranscriptionAsync()
+    {
+        var transcriptPath = Path.ChangeExtension(RecordingFilePath, ".txt");
+        File.WriteAllText(transcriptPath, TranscriptionText);
+
+        var summary = await _summaryService.SummarizeAsync(TranscriptionText);
+        var summaryPath = Path.ChangeExtension(RecordingFilePath, ".summary.txt");
+        File.WriteAllText(summaryPath, summary);
+
+        var tags = await _tagGeneratorService.GenerateTagsAsync(TranscriptionText);
+        var tagPath = Path.ChangeExtension(RecordingFilePath, ".tags.json");
+        File.WriteAllText(tagPath, JsonSerializer.Serialize(tags));
     }
 
     private async Task<string> ReplaceSpeakerIdsAsync(string rawText)

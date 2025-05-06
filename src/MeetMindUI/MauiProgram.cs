@@ -64,6 +64,8 @@ namespace MeetMindUI
             builder.Services.AddSingleton<HistoryViewModel>();
             builder.Services.AddSingleton<ISummaryService, SummarizationPythonService>();
             builder.Services.AddSingleton<IVoiceMappingStore, JsonVoiceMappingStore>();
+            builder.Services.AddSingleton<ITagGeneratorService, TagGeneratorService>();
+            builder.Services.AddSingleton<IGoogleDriveUploaderService, GoogleDriveUploaderService>();
 
 
             // Enregistrement du service Google Calendar
