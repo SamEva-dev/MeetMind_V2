@@ -60,12 +60,18 @@ namespace MeetMindUI
             builder.Services.AddSingleton<RecordingViewModel>();
             builder.Services.AddSingleton<RecordingPage>();
             builder.Services.AddTransient<ParticipantsViewModel>();
+            builder.Services.AddTransient<SpeechSegmentModalPage>();
             builder.Services.AddSingleton<HistoryPage>();
             builder.Services.AddSingleton<HistoryViewModel>();
+            builder.Services.AddSingleton<SettingsPage>();
+            builder.Services.AddSingleton<SettingsViewModel>();
+
             builder.Services.AddSingleton<ISummaryService, SummarizationPythonService>();
             builder.Services.AddSingleton<IVoiceMappingStore, JsonVoiceMappingStore>();
             builder.Services.AddSingleton<ITagGeneratorService, TagGeneratorService>();
             builder.Services.AddSingleton<IGoogleDriveUploaderService, GoogleDriveUploaderService>();
+            builder.Services.AddSingleton<ISilenceDetectorService, FfmpegSilenceDetectorService>();
+            builder.Services.AddSingleton<ISettingsService, LocalSettingsService>();
 
 
             // Enregistrement du service Google Calendar

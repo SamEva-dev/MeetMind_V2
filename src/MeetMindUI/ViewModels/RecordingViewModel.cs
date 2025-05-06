@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using MeetMind.Service.Contracts;
+using MeetMind.Service.Models;
 using MeetMindUI.Views;
 using Serilog;
 
@@ -18,6 +19,10 @@ public partial class RecordingViewModel : ObservableObject
     private readonly ICalendarService _calendarService;
     private readonly IVoiceMappingStore _voiceMappingStore;
     private readonly ITagGeneratorService _tagGeneratorService;
+    private readonly ISilenceDetectorService _silenceDetectorService;
+
+    private readonly ISettingsService _settingsService;
+    private UserSettings _settings = new();
 
     [ObservableProperty]
     private bool _isRecording;
@@ -40,12 +45,20 @@ public partial class RecordingViewModel : ObservableObject
     [ObservableProperty]
     private string _summaryText = string.Empty;
 
+    [ObservableProperty]
+    private bool _autoPlay;
+
+    [ObservableProperty]
+    private bool showControls;
+
     public RecordingViewModel(IAudioRecorderService recorderService,
                             ITranscriptionService transcriptionService,
                             ISummaryService summaryService,
                             ICalendarService calendarService,
                             IVoiceMappingStore voiceMappingStore,
-                            ITagGeneratorService tagGeneratorService)
+                            ITagGeneratorService tagGeneratorService,
+                            ISilenceDetectorService silenceDetectorService,
+                            ISettingsService settingsService)
     {
         _recorderService = recorderService;
         _transcriptionService = transcriptionService;
@@ -54,7 +67,19 @@ public partial class RecordingViewModel : ObservableObject
         _voiceMappingStore = voiceMappingStore;
         _voiceMappingStore = voiceMappingStore;
         _tagGeneratorService = tagGeneratorService;
+        _silenceDetectorService = silenceDetectorService;
+        _settingsService = settingsService;
+
+        LoadSettings();
     }
+
+    private async void LoadSettings()
+    {
+        _settings = await _settingsService.LoadAsync();
+        AutoPlay = _settings.AutoPlayAudio;
+        ShowControls = _settings.ShowAudioControls;
+    }
+
 
     [RelayCommand(CanExecute = nameof(CanStartRecording))]
     private async Task StartRecordingAsync()
@@ -110,6 +135,7 @@ public partial class RecordingViewModel : ObservableObject
             IsRecording = true;
             StatusText = "Recording...";
             Log.Information("Recording started: {Path}", filepath);
+            
         }
         catch (Exception ex)
         {
@@ -149,6 +175,7 @@ public partial class RecordingViewModel : ObservableObject
         StartRecordingCommand.NotifyCanExecuteChanged();
         StopRecordingCommand.NotifyCanExecuteChanged();
     }
+
     [RelayCommand]
     private async Task GenerateSummaryAsync()
     {
@@ -209,83 +236,107 @@ public partial class RecordingViewModel : ObservableObject
         Log.Information("Updated transcription saved: {Path}", updatedPath);
     }
 
+    [RelayCommand]
+    public async Task DetectSegmentsAsync()
+    {
+#if ANDROID || IOS
+        await Application.Current.MainPage.DisplayAlert("Unavailable", "Silence detection not available on mobile yet.", "OK");
+#else
+            if (string.IsNullOrWhiteSpace(RecordingFilePath))
+            {
+                await Application.Current.MainPage.DisplayAlert("Error", "No recording selected.", "OK");
+                return;
+            }
+
+            var segments = await _silenceDetectorService.GetSpeechSegmentsAsync(RecordingFilePath);
+            var page = new SpeechSegmentModalPage(segments);
+            await Application.Current.MainPage.Navigation.PushModalAsync(page);
+#endif
+    }
+
     private bool CanStopRecording() => IsRecording;
 
     private async Task PerformTranscriptionAndSummaryAsync()
     {
-        try
+        if (_settings.AutoSummarize)
         {
-            IsTranscribing = true;
-            StatusText = "Transcribing...";
-
-            var transcriptionResult = await _transcriptionService.TranscribeAsync(RecordingFilePath);
-            TranscriptionText = transcriptionResult.Success ? transcriptionResult.Transcript ?? string.Empty : string.Empty;
-            OnPropertyChanged(nameof(TranscriptionText));
-
-            // Remplacer les SPEAKER_ID par les noms connus
-            TranscriptionText = await ReplaceSpeakerIdsAsync(TranscriptionText);
-            OnPropertyChanged(nameof(TranscriptionText));
-
-            // Sauvegarde initiale
-            var txtPath = Path.ChangeExtension(RecordingFilePath, ".txt");
-            File.WriteAllText(txtPath, TranscriptionText, Encoding.UTF8);
-            Log.Information("Transcription saved: {Path}", txtPath);
-
-            // Association manuelle des speakers inconnus
-            var unknownSpeakers = await GetUnknownSpeakerIdsAsync(TranscriptionText);
-            foreach (var speakerId in unknownSpeakers)
+            try
             {
-                var name = await Application.Current.MainPage.DisplayPromptAsync(
-                    "Assign a Name", $"Who is [{speakerId}] ?", "Save", "Cancel", "Ex: Luc", -1, Keyboard.Text);
+                IsTranscribing = true;
+                StatusText = "Transcribing...";
 
-                if (!string.IsNullOrWhiteSpace(name))
+                var transcriptionResult = await _transcriptionService.TranscribeAsync(RecordingFilePath);
+                TranscriptionText = transcriptionResult.Success ? transcriptionResult.Transcript ?? string.Empty : string.Empty;
+                OnPropertyChanged(nameof(TranscriptionText));
+
+                // Remplacer les SPEAKER_ID par les noms connus
+                TranscriptionText = await ReplaceSpeakerIdsAsync(TranscriptionText);
+                OnPropertyChanged(nameof(TranscriptionText));
+
+                // Sauvegarde initiale
+                var txtPath = Path.ChangeExtension(RecordingFilePath, ".txt");
+                File.WriteAllText(txtPath, TranscriptionText, Encoding.UTF8);
+                Log.Information("Transcription saved: {Path}", txtPath);
+
+                // Association manuelle des speakers inconnus
+                var unknownSpeakers = await GetUnknownSpeakerIdsAsync(TranscriptionText);
+                foreach (var speakerId in unknownSpeakers)
                 {
-                    await _voiceMappingStore.SaveMappingAsync(speakerId, name);
-                    Log.Information("Assigned {SpeakerId} to {Name}", speakerId, name);
+                    var name = await Application.Current.MainPage.DisplayPromptAsync(
+                        "Assign a Name", $"Who is [{speakerId}] ?", "Save", "Cancel", "Ex: Luc", -1, Keyboard.Text);
+
+                    if (!string.IsNullOrWhiteSpace(name))
+                    {
+                        await _voiceMappingStore.SaveMappingAsync(speakerId, name);
+                        Log.Information("Assigned {SpeakerId} to {Name}", speakerId, name);
+                    }
                 }
+
+                // Remplacer à nouveau les noms
+                TranscriptionText = await ReplaceSpeakerIdsAsync(TranscriptionText);
+                OnPropertyChanged(nameof(TranscriptionText));
+
+                // Resave mise à jour
+                File.WriteAllText(txtPath, TranscriptionText, Encoding.UTF8);
+                Log.Information("Updated transcription saved: {Path}", txtPath);
             }
-
-            // Remplacer à nouveau les noms
-            TranscriptionText = await ReplaceSpeakerIdsAsync(TranscriptionText);
-            OnPropertyChanged(nameof(TranscriptionText));
-
-            // Resave mise à jour
-            File.WriteAllText(txtPath, TranscriptionText, Encoding.UTF8);
-            Log.Information("Updated transcription saved: {Path}", txtPath);
-        }
-        catch (Exception ex)
-        {
-            StatusText = "Error during transcription";
-            Log.Error(ex, "Transcription failed");
-        }
-        finally
-        {
-            IsTranscribing = false;
+            catch (Exception ex)
+            {
+                StatusText = "Error during transcription";
+                Log.Error(ex, "Transcription failed");
+            }
+            finally
+            {
+                IsTranscribing = false;
+            }
         }
 
-        // Trigger summary automatically
-        try
+        if (_settings.AutoSummarize)
         {
-            IsSummarizing = true;
-            StatusText = "Summarizing...";
+            // Trigger summary automatically
+            try
+            {
+                IsSummarizing = true;
+                StatusText = "Summarizing...";
 
-            SummaryText = await _summaryService.SummarizeAsync(TranscriptionText);
-            OnPropertyChanged(nameof(SummaryText));
+                SummaryText = await _summaryService.SummarizeAsync(TranscriptionText);
+                OnPropertyChanged(nameof(SummaryText));
 
-            // Save summary
-            var summaryPath = Path.ChangeExtension(RecordingFilePath, ".summary.txt");
-            File.WriteAllText(summaryPath, SummaryText, Encoding.UTF8);
-            Log.Information("Summary saved: {Path}", summaryPath);
-        }
-        catch (Exception ex)
-        {
-            StatusText = "Error during summarization";
-            Log.Error(ex, "Summarization failed");
-        }
-        finally
-        {
-            IsSummarizing = false;
-            StatusText = "Ready to record";
+                // Save summary
+                var summaryPath = Path.ChangeExtension(RecordingFilePath, ".summary.txt");
+                File.WriteAllText(summaryPath, SummaryText, Encoding.UTF8);
+                Log.Information("Summary saved: {Path}", summaryPath);
+            }
+            catch (Exception ex)
+            {
+                StatusText = "Error during summarization";
+                Log.Error(ex, "Summarization failed");
+            }
+            finally
+            {
+                IsSummarizing = false;
+                StatusText = "Ready to record";
+            }
         }
     }
 

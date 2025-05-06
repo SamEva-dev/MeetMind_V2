@@ -21,4 +21,9 @@
         ContentTemplate="{DataTemplate views:HistoryPage}"
         Route="HistoryPage" />
 
+    <ShellContent
+    Title="Setting"
+    ContentTemplate="{DataTemplate views:SettingsPage}"
+    Route="SettingsPage" />
+
 </Shell>

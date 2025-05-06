@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MeetMindUI.Views.SettingsPage"
+             Title="SettingsPage">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
+            <Label Text="General Preferences" FontAttributes="Bold" FontSize="18" />
+
+            <Switch IsToggled="{Binding Settings.AutoRecord}" />
+            <Label Text="Start recording automatically" />
+
+            <Switch IsToggled="{Binding Settings.AutoTranscribe}" />
+            <Label Text="Transcribe automatically after stop" />
+
+            <Switch IsToggled="{Binding Settings.AutoSummarize}" />
+            <Label Text="Summarize automatically after transcription" />
+
+            <Switch IsToggled="{Binding Settings.AutoPlayAudio}" />
+            <Label Text="Auto-play audio previews" />
+
+            <Switch IsToggled="{Binding Settings.ShowAudioControls}" />
+            <Label Text="Show audio playback controls" />
+
+            <Label Text="Language" FontAttributes="Bold" Margin="0,10,0,0" />
+
+            <Picker Title="Language"
+              ItemsSource="{Binding AvailableLanguages}"
+              SelectedItem="{Binding Settings.PreferredLanguage}" />
+
+            <Switch IsToggled="{Binding Settings.UseSystemLanguage}" />
+            <Label Text="Use system language" />
+
+            <Button Text="Save Settings" Command="{Binding SaveCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
