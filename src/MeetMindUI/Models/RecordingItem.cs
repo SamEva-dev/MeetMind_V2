@@ -21,4 +21,5 @@ public class RecordingItem
         get => File.Exists(NotesPath) ? File.ReadAllText(NotesPath) : string.Empty;
         set => File.WriteAllText(NotesPath, value);
     }
+    public bool HasNotes { get; set; }
 }

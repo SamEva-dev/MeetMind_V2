@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MeetMind.Service.Contracts;
 using MeetMindUI.Enums;
 using MeetMindUI.Models;
+using MeetMindUI.Views;
 
 namespace MeetMindUI.ViewModels;
 
@@ -54,7 +50,12 @@ public partial class HistoryViewModel : ObservableObject
         var files = Directory.GetFiles(dir, "*.3gp");
         foreach (var file in files)
         {
-            Recordings.Add(new RecordingItem { FileName = file });
+            var recording = new RecordingItem { FileName = file };
+            if (File.Exists(recording.NotesPath) && new FileInfo(recording.NotesPath).Length > 0)
+            {
+                recording.HasNotes = true;
+            }
+            Recordings.Add(recording);
         }
 
         ApplyFilter();
@@ -184,6 +185,16 @@ public partial class HistoryViewModel : ObservableObject
 
         await _driveUploaderService.UploadRecordingAsync(zipPath, item.DisplayName, item.Created);
         await Application.Current.MainPage.DisplayAlert("Google Drive", "Upload completed successfully.", "OK");
+    }
+
+    [RelayCommand]
+    private async Task EditNotesAsync(RecordingItem item)
+    {
+        var page = new NotesModalPage(item.NotesPath, () =>
+        {
+            item.HasNotes = File.Exists(item.NotesPath) && new FileInfo(item.NotesPath).Length > 0;
+        });
+        await Application.Current.MainPage.Navigation.PushModalAsync(page);
     }
 
     private void ApplyFilter()

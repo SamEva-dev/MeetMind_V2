@@ -72,11 +72,22 @@
                       Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=ShareCommand}"
                       CommandParameter="{Binding}" />
 
-                            <Button Text="Upload to Drive"
-                      BackgroundColor="#4285F4"
-                      TextColor="White"
-                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:HistoryViewModel}}, Path=UploadToDriveCommand}"
-                      CommandParameter="{Binding}" />
+                            <Button>
+                                <Button.Text>
+                                    <MultiBinding StringFormat="{0}{1}">
+                                        <Binding Path="HasNotes" Converter="{StaticResource BoolToSymbolConverter}" />
+                                        <Binding Path="" ConverterParameter="Notes" Converter="{StaticResource StaticStringConverter}" />
+                                    </MultiBinding>
+                                </Button.Text>
+                                <Button.Command>
+                                    <Binding Source="{RelativeSource AncestorType={x:Type vm:HistoryViewModel}}" Path="EditNotesCommand" />
+                                </Button.Command>
+                                <Button.CommandParameter>
+                                    <Binding />
+                                </Button.CommandParameter>
+                                <Button.BackgroundColor>#666</Button.BackgroundColor>
+                                <Button.TextColor>White</Button.TextColor>
+                            </Button>
                         </HorizontalStackLayout>
                     </StackLayout>
                 </DataTemplate>
